@@ -28,27 +28,26 @@ $tblComponents = array();
 // For Reference:
 //      http://www.oidview.com/mibs/9/CISCO-NTP-MIB.html
 //      http://www.cisco.com/c/en/us/support/docs/availability/high-availability/19643-ntpm.html
-$ntpAssocTable = snmpwalk_group($device, 'ntpAssocEntry', SPECTRACOM-NTP-V4-MIB);
+$ntpAssocEntry = snmpwalk_group($device, 'ntpAssocEntry', 'SPECTRACOM-NTP-V4-MIB');
 
 /*
  * False == no object found - this is not an error, no objects exist
  * null  == timeout or something else that caused an error, there may be objects but we couldn't get it.
  */
-if (is_null($ntpAssocTable)) {
+if (is_null($ntpAssocEntry)) {
     // We have to error here or we will end up deleting all our components.
     echo "Error\n";
 } else {
     // No Error, lets process things.
     d_echo("Objects Found:\n");
-
     // Let's grab the index for each NTP peer
-    foreach ($ntpArrayEntry as $index => $value) {
+    foreach ($ntpAssocEntry as $index => $value) {
         $result = array();
         $result['UID'] = (string)$index;    // This is cast as a string so it can be compared with the database value.
-        $result['peer'] = $ntpAssocTable[$index]['assocEntryIdentity'];
+        $result['peer'] = $ntpAssocEntry[$index]['assocEntryIdentity'];
         $result['port'] = '123'; // sync by GPS so we use presume default port 
-        $result['stratum'] = $ntpAssocTable[$index]['assocEntryStratum'];
-        $result['peerref'] = $ntpAssocTable[$index]['assocEntryRefId'];
+        $result['stratum'] = $ntpAssocEntry[$index]['assocEntryStratum'];
+        $result['peerref'] = $ntpAssocEntry[$index]['assocEntryRefId'];
         $result['label'] = $result['peer'].":".$result['port'];
 
         // Set the status, 16 = Bad

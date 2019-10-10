@@ -28,6 +28,10 @@ if ($device['os'] == 'awplus') {
     include 'includes/polling/ntp/awplus.inc.php';
 }
 
+if ($device['os'] == 'spectracom') {
+    include 'includes/polling/ntp/spectracom.inc.php';
+}
+
 unset(
     $cntpPeersVarEntry,
     $atNtpAssociationEntry

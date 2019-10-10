@@ -1,0 +1,15 @@
+os: spectracom
+text: 'Spectracom SecureSync'
+type: appliance 
+icon: spectracom
+group: orolia
+mib_dir: 
+    - spectracom
+over:
+    - { graph: device_bits, text: 'Device Traffic' }
+    - { graph: device_processor, text: 'CPU Usage' }
+    - { graph: device_mempool, text: 'Memory Usage' }
+    - { graph: device_storage, text: 'Storage Usage' }
+discovery:
+    - sysObjectID:
+        - .1.3.6.1.4.1.18837.3

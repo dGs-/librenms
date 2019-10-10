@@ -1,0 +1,387 @@
+--******************************************************************************
+--  Module  : SPECTRACOM-GPTP-REG.mib
+--  Date    : 31 January 2017
+--  Authors : Najah HAJEJE
+--  Purpose : This MIB defines the GPTP MIB for the private Spectracom MIB.
+--  
+--  Copyright(C) 2017 Spectracom Corporation.
+--  All Rights Reserved.
+--..............................................................................
+
+SPECTRACOM-GPTP-MIB DEFINITIONS ::= BEGIN
+
+IMPORTS
+    MODULE-IDENTITY, OBJECT-TYPE, Unsigned32
+        FROM SNMPv2-SMI
+    MODULE-COMPLIANCE, OBJECT-GROUP
+        FROM SNMPv2-CONF
+    DisplayString
+        FROM SNMPv2-TC
+    specModules, specProducts
+        FROM SPECTRACOM-GLOBAL-REG-MIB;
+
+spectracomGPtpMibModule MODULE-IDENTITY
+--               "YYYYMMDDHHMMZ"
+    LAST-UPDATED "201701310000Z"
+    ORGANIZATION "Spectracom"
+    CONTACT-INFO
+        "Postal: Spectracom
+                 1565 Jefferson Road Suite 460 
+                 Rochester, NY 14623
+         Tel:    (585) 321-5800
+         Fax:    (585) 321-5218
+         Email:  techsupport@spectracom.com"
+    DESCRIPTION
+        "Spectracom Corporation's GPTP MIB."
+                                    
+    REVISION     "201701310000Z"
+    DESCRIPTION
+        "Rev 1.0 - Initial Revision."
+    ::= { specModules 7 }
+
+--******************************************************************************
+-- Tree definition
+--..............................................................................
+
+--gptpSnmpObjs subtree
+gptpSnmpObjs             OBJECT IDENTIFIER ::= { specProducts 5 }
+
+--gptpStatusObjs subtree
+gptpStatusObjs           OBJECT IDENTIFIER ::= { gptpSnmpObjs 1 }
+
+--******************************************************************************
+-- gptpStatusObjs Objects [enterprises.18837.3.4.1.1.1.x]
+--..............................................................................
+
+gptpStatusTable                                 OBJECT-TYPE
+    SYNTAX                                      SEQUENCE OF PtpStatusTableEntry
+    MAX-ACCESS                                  not-accessible
+    STATUS                                      current
+    DESCRIPTION
+        "This table contains status for all Gigabyte PTP Module that are present 
+         in system."
+    ::= { gptpStatusObjs 1 }
+
+gptpStatusTableEntry                            OBJECT-TYPE
+    SYNTAX                                      PtpStatusTableEntry
+    MAX-ACCESS                                  not-accessible
+    STATUS                                      current
+    DESCRIPTION
+        "A table entry (row) in the Gigabyte PTP Module table."
+    INDEX                                       { gptpStatusRow }
+    ::= { gptpStatusTable 1 }
+
+PtpStatusTableEntry ::= SEQUENCE {
+        gptpStatusRow                                 Unsigned32,
+        gptpStatusInstance                            Unsigned32,
+        gptpStatusNetworkIp                           DisplayString,
+        gptpStatusNetworkNetmask                      DisplayString,
+        gptpStatusNetworkGateway                      DisplayString,
+        gptpStatusNetworkTransportProtocol            DisplayString,
+        gptpStatusNetworkTtl                          INTEGER,
+        gptpStatusNetworkDomainNumber                 INTEGER,
+        gptpStatusPortNumber                          INTEGER,
+        gptpStatusPortState                           DisplayString,
+        gptpStatusClockIdentity                       DisplayString,
+        gptpStatusClockMode                           DisplayString,
+        gptpStatusClockClass                          INTEGER,
+        gptpStatusClockAccuracy                       DisplayString,
+        gptpStatusProtocolGmClockClass                INTEGER,
+        gptpStatusProtocolGmClockAccuracy             DisplayString,
+        gptpStatusProtocolMulticastMasterSyncInt      INTEGER,
+		gptpStatusProtocolMulticastMasterAnnInt       INTEGER,
+		gptpStatusProtocolUnicastMasterSyncInt        INTEGER,
+        gptpStatusProtocolUnicastMasterSyncDur        INTEGER,
+        gptpStatusProtocolUnicastMasterAnnInt         INTEGER,
+        gptpStatusProtocolUnicastMasterAnnDur         INTEGER,
+        gptpStatusProtocolUnicastMasterDReqInt        INTEGER,
+        gptpStatusProtocolUnicastMasterDReqDur        INTEGER,
+	    gptpStatusProtocolDelayMechanism              DisplayString }
+
+gptpStatusRow                                   OBJECT-TYPE
+    SYNTAX                                      Unsigned32(1..8)
+    MAX-ACCESS                                  not-accessible
+    STATUS                                      current
+    DESCRIPTION
+        "This is the unique row index for each PTP reference."
+    ::= { gptpStatusTableEntry 1 }
+        
+gptpStatusInstance                              OBJECT-TYPE
+    SYNTAX                                      Unsigned32(0..7)
+    MAX-ACCESS                                  read-only
+    STATUS                                      current
+    DESCRIPTION
+        "This is the unique instance for the PTP."
+    ::= { gptpStatusTableEntry 2 }
+        
+gptpStatusNetworkIp                             OBJECT-TYPE
+    SYNTAX                                      DisplayString(SIZE(20))
+    MAX-ACCESS                                  read-only
+    STATUS                                      current
+    DESCRIPTION
+        "This indicates the current IP address of the Ethernet interface."
+    ::= { gptpStatusTableEntry 3 }               
+        
+gptpStatusNetworkNetmask                        OBJECT-TYPE
+    SYNTAX                                      DisplayString(SIZE(20))
+    MAX-ACCESS                                  read-only
+    STATUS                                      current
+    DESCRIPTION
+        "This indicates the current netmask of the Ethernet interface."
+    ::= { gptpStatusTableEntry 4 }       
+
+gptpStatusNetworkGateway                        OBJECT-TYPE
+    SYNTAX                                      DisplayString(SIZE(20))
+    MAX-ACCESS                                  read-only
+    STATUS                                      current
+    DESCRIPTION
+        "This indicates the current gateway of the Ethernet interface."
+    ::= { gptpStatusTableEntry 5 }               
+
+gptpStatusNetworkTransportProtocol              OBJECT-TYPE
+    SYNTAX                                      DisplayString(SIZE(20))
+    MAX-ACCESS                                  read-only
+    STATUS                                      current
+    DESCRIPTION
+        "This indicates the Transport protocol for PTP packets 
+         (Either PTP over IPv4 or PTP over 802.3/Ethernet)."
+    ::= { gptpStatusTableEntry 6 }       
+
+gptpStatusNetworkTtl                            OBJECT-TYPE
+    SYNTAX                                      INTEGER
+    MAX-ACCESS                                  read-only
+    STATUS                                      current
+    DESCRIPTION
+        "This indicates the Time To Live (TTL) for PTP packets."
+    ::= { gptpStatusTableEntry 7 }       
+        
+gptpStatusNetworkDomainNumber                   OBJECT-TYPE
+    SYNTAX                                      INTEGER
+    MAX-ACCESS                                  read-only
+    STATUS                                      current
+    DESCRIPTION
+        "This indicates the domain number."
+    ::= { gptpStatusTableEntry 8 }       
+        
+gptpStatusPortNumber                            OBJECT-TYPE
+    SYNTAX                                      INTEGER
+    MAX-ACCESS                                  read-only
+    STATUS                                      current
+    DESCRIPTION
+        "This indicates the port number."
+    ::= { gptpStatusTableEntry 9 }
+        
+gptpStatusPortState                             OBJECT-TYPE
+    SYNTAX                                      DisplayString(SIZE(20))
+    MAX-ACCESS                                  read-only
+    STATUS                                      current
+    DESCRIPTION
+        "This is a string representation of the state of the port, 
+         based on the names defined in section 9.2.4 of 
+         the PTP protocol specification."
+    ::= { gptpStatusTableEntry 10 }
+
+gptpStatusClockIdentity                         OBJECT-TYPE
+    SYNTAX                                      DisplayString(SIZE(24))
+    MAX-ACCESS                                  read-only
+    STATUS                                      current
+    DESCRIPTION
+        "This indicates the PTP clock identity."
+    ::= { gptpStatusTableEntry 11 }
+
+gptpStatusClockMode                             OBJECT-TYPE
+    SYNTAX                                      DisplayString(SIZE(20))
+    MAX-ACCESS                                  read-only
+    STATUS                                      current
+    DESCRIPTION
+        "This indicates the PTP clock mode 
+         (Either slave-only, master-only or master-slave)."
+    ::= { gptpStatusTableEntry 12 }
+        
+gptpStatusClockClass                            OBJECT-TYPE
+    SYNTAX                                      INTEGER { sync(6),
+                                                          holdoverInSpec(7),
+                                                          holdoverOutSpec1(52),
+                                                          holdoverOutSpec2(187),
+                                                          nosync(248),
+                                                          unknown(255) }
+    MAX-ACCESS                                  read-only
+    STATUS                                      current
+    DESCRIPTION
+        "This indicates the PTP clock class according to the PTP V2 standard 
+         depending on the timescale of the reference clock generated by the Host
+         board.
+         6:   Time and 1pps references are synchronized with the host
+              references.
+         7:   Time and 1pps references are in holdover state, within
+              specifications.
+         52:  Time and 1pps references are in holdover state, not within
+              specifications.
+         187: Time and 1pps references are in holdover state, not within
+              specifications.
+         255: Slave Only class.
+         248: Unknown class."
+    ::= { gptpStatusTableEntry 13 }
+
+gptpStatusClockAccuracy                         OBJECT-TYPE
+    SYNTAX                                      DisplayString(SIZE(20))
+    MAX-ACCESS                                  read-only
+    STATUS                                      current
+    DESCRIPTION
+        "This indicates the PTP clock accuracy."
+    ::= { gptpStatusTableEntry 14 }
+        
+gptpStatusProtocolGmClockClass                  OBJECT-TYPE
+    SYNTAX                                      INTEGER { sync(6),
+                                                          holdoverInSpec(7),
+                                                          holdoverOutSpec1(52),
+                                                          holdoverOutSpec2(187),
+                                                          nosync(248),
+                                                          unknown(255) }
+    MAX-ACCESS                                  read-only
+    STATUS                                      current
+    DESCRIPTION
+        "This indicates the clock class of the domain's GrandMaster.
+         6:   Time and 1pps references are synchronized with the host
+              references.
+         7:   Time and 1pps references are in holdover state, within
+              specifications.
+         52:  Time and 1pps references are in holdover state, not within
+              specifications.
+         187: Time and 1pps references are in holdover state, not within
+              specifications.
+         255: Slave Only class.
+         248: Unknown class."
+    ::= { gptpStatusTableEntry 15 }
+
+gptpStatusProtocolGmClockAccuracy               OBJECT-TYPE
+    SYNTAX                                      DisplayString(SIZE(20))
+    MAX-ACCESS                                  read-only
+    STATUS                                      current
+    DESCRIPTION
+        "This indicates the clock accuracy of the domain's GrandMaster."
+    ::= { gptpStatusTableEntry 16 }
+        
+gptpStatusProtocolMulticastMasterSyncInt        OBJECT-TYPE
+    SYNTAX                                      INTEGER
+    MAX-ACCESS                                  read-only
+    STATUS                                      current
+    DESCRIPTION
+        "This is the Multicast Sync Rate (In packets per second)."
+    ::= { gptpStatusTableEntry 17 }
+	
+gptpStatusProtocolMulticastMasterAnnInt        OBJECT-TYPE
+    SYNTAX                                      INTEGER
+    MAX-ACCESS                                  read-only
+    STATUS                                      current
+    DESCRIPTION
+        "This is the Multicast Announce Rate (In packets per second)."
+    ::= { gptpStatusTableEntry 18 }
+ 
+gptpStatusProtocolUnicastMasterSyncInt        OBJECT-TYPE
+    SYNTAX                                      INTEGER
+    MAX-ACCESS                                  read-only
+    STATUS                                      current
+    DESCRIPTION
+        "The minimum value of Sync interval granted by the Master Clock (In packets per second) for Unicast mode."
+    ::= { gptpStatusTableEntry 19 } 	
+	
+gptpStatusProtocolUnicastMasterSyncDur        OBJECT-TYPE
+    SYNTAX                                      INTEGER
+    MAX-ACCESS                                  read-only
+    STATUS                                      current
+    DESCRIPTION
+        "The maximum value of Sync interval granted by the Master Clock (In seconds) for Unicast mode."
+    ::= { gptpStatusTableEntry 20 }
+  	
+gptpStatusProtocolUnicastMasterAnnInt        OBJECT-TYPE
+    SYNTAX                                      INTEGER
+    MAX-ACCESS                                  read-only
+    STATUS                                      current
+    DESCRIPTION
+        "The minimum value of the Announce interval granted by the Master Clock (In packets per second) for Unicast mode."
+    ::= { gptpStatusTableEntry 21 }
+  	
+gptpStatusProtocolUnicastMasterAnnDur        OBJECT-TYPE
+    SYNTAX                                      INTEGER
+    MAX-ACCESS                                  read-only
+    STATUS                                      current
+    DESCRIPTION
+        "The maximum value of the Announce interval granted by the Master Clock (In seconds) for Unicast mode."
+    ::= { gptpStatusTableEntry 22 }
+	
+gptpStatusProtocolUnicastMasterDReqInt        OBJECT-TYPE
+    SYNTAX                                      INTEGER
+    MAX-ACCESS                                  read-only
+    STATUS                                      current
+    DESCRIPTION
+        "The minimum value of Delay_Req interval granted by the Master Clock (In packets per second) for Unicast mode."
+    ::= { gptpStatusTableEntry 23 }
+	
+gptpStatusProtocolUnicastMasterDReqDur        OBJECT-TYPE
+    SYNTAX                                      INTEGER
+    MAX-ACCESS                                  read-only
+    STATUS                                      current
+    DESCRIPTION
+        "The maximum value of the Delay_Req interval granted by the Master Clock (In seconds) for Unicast mode."
+    ::= { gptpStatusTableEntry 24 }
+
+gptpStatusProtocolDelayMechanism                OBJECT-TYPE
+    SYNTAX                                      DisplayString(SIZE(20))
+    MAX-ACCESS                                  read-only
+    STATUS                                      current
+    DESCRIPTION
+        "This specifies the delay-mechanism used by the PTP port 
+         (Either E2E, P2P, or Disabled)."
+    ::= { gptpStatusTableEntry 25 }      
+
+--******************************************************************************
+-- Conformance Section [enterprises.18837.3.4.90.x]
+--..............................................................................
+
+-- OEM
+gptpConformance    OBJECT IDENTIFIER ::= { gptpSnmpObjs 90 }
+gptpCompliances    OBJECT IDENTIFIER ::= { gptpConformance 1 }
+gptpGroups         OBJECT IDENTIFIER ::= { gptpConformance 2 }
+
+gptpCompliance     MODULE-COMPLIANCE
+    STATUS        current
+    DESCRIPTION 
+        "The compliance statement for SNMP entities which implement version 2
+         of the Spectracom PTP MIB."
+    MODULE -- this module
+        MANDATORY-GROUPS { gptpObjectsGroup }
+    ::= { gptpCompliances 1 }
+
+-- CONFORMANCE_OEM
+gptpObjectsGroup   OBJECT-GROUP 
+    OBJECTS     { gptpStatusInstance,
+                  gptpStatusNetworkIp,
+                  gptpStatusNetworkNetmask,
+                  gptpStatusNetworkGateway,
+                  gptpStatusNetworkTransportProtocol,
+                  gptpStatusNetworkTtl,
+                  gptpStatusNetworkDomainNumber,
+                  gptpStatusPortNumber,
+                  gptpStatusPortState,
+                  gptpStatusClockIdentity,
+                  gptpStatusClockMode,
+                  gptpStatusClockClass,
+                  gptpStatusClockAccuracy,
+                  gptpStatusProtocolGmClockClass,
+                  gptpStatusProtocolGmClockAccuracy,
+                  gptpStatusProtocolMulticastMasterSyncInt,
+	              gptpStatusProtocolMulticastMasterAnnInt,
+	              gptpStatusProtocolUnicastMasterSyncInt,
+	              gptpStatusProtocolUnicastMasterSyncDur, 
+	              gptpStatusProtocolUnicastMasterAnnInt, 
+	              gptpStatusProtocolUnicastMasterAnnDur,  
+	              gptpStatusProtocolUnicastMasterDReqInt,  
+	              gptpStatusProtocolUnicastMasterDReqDur, 
+                  gptpStatusProtocolDelayMechanism }
+    STATUS        current
+    DESCRIPTION
+        "The collection of objects for the Spectracom PTP MIB"
+    ::= { gptpGroups 1 }
+
+END

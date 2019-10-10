@@ -34,3 +34,6 @@ if (file_exists(Config::get('install_dir') . "/includes/discovery/ntp/{$device['
 if ($device['os'] == 'awplus') {
     include 'includes/discovery/ntp/awplus.inc.php';
 }
+if ($device['os'] == 'spectracom') {
+    include 'includes/discovery/ntp/spectracom.inc.php';
+}

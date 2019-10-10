@@ -1,0 +1,964 @@
+--******************************************************************************
+--  Module  : SPECTRACOM-SECURESYNC-REG.mib
+--  Date    : 26 April 2015
+--  Authors : Herve Echelard, Mark Goodlein
+--  Purpose : This MIB defines the SecureSync product module for the private
+--            Spectracom MIB.
+--
+--  Copyright(C) 2010-2016 Spectracom Corporation.
+--  All Rights Reserved.
+--..............................................................................
+
+SPECTRACOM-SECURESYNC-MIB DEFINITIONS ::= BEGIN
+
+IMPORTS
+    MODULE-IDENTITY, OBJECT-TYPE, NOTIFICATION-TYPE, Integer32, Unsigned32
+        FROM SNMPv2-SMI
+    MODULE-COMPLIANCE, OBJECT-GROUP, NOTIFICATION-GROUP
+        FROM SNMPv2-CONF
+    DisplayString
+        FROM SNMPv2-TC
+    specModules, specProducts
+        FROM SPECTRACOM-GLOBAL-REG-MIB;
+
+spectracomSecureSyncMibModule MODULE-IDENTITY
+--               "YYYYMMDDHHMMZ"
+    LAST-UPDATED "201511101300Z"
+    ORGANIZATION "Spectracom"
+    CONTACT-INFO
+        "Postal: Spectracom
+                 1565 Jefferson Road Suite 460
+                 Rochester, NY 14623
+         Tel:    (585) 321-5800
+         Fax:    (585) 321-5218
+         Email:  techsupport@spectracom.com"
+    DESCRIPTION
+        "Spectracom Corporation's SecureSync MIB."
+
+    REVISION    "201511101300Z"
+    DESCRIPTION
+        "Rev 1.8 - Added Temperature related objects and traps."
+    REVISION    "201502201924Z"
+    DESCRIPTION
+        "Rev 1.7 - Added ssSysStaSerial object."
+    REVISION    "201410081453Z"
+    DESCRIPTION
+        "Rev 1.6 - Added ssRefMgmtTimeValid and ssRefMgmt1PPSValid."
+	REVISION    "201306171453Z"
+    DESCRIPTION
+        "Rev 1.5 - Updated address."
+    REVISION     "201202020000Z"
+    DESCRIPTION
+        "Rev 1.4 - Added the ssSysStaDateTime object."
+
+    REVISION     "201110310000Z"
+    DESCRIPTION
+        "Rev 1.3 - Added the Reboot event."
+
+    REVISION     "201103280000Z"
+    DESCRIPTION
+        "Rev 1.2 - Added new column as index for GPS table.
+                 - Changed enumerations to remove (0) values.
+                 - Changed size of reference identifier strings from 20 to 5.
+                 - Added Reference Managemant objects.
+                 - Added System Control objects.
+                 - Replaced misspelled Freqency with Frequency.
+                 - Fixed the varbind included with the ssEvtV2MajorAlarm event."
+
+    REVISION     "201007260000Z"
+    DESCRIPTION
+        "Rev 1.1 - Updates to variable descriptions."
+
+    REVISION     "201004170000Z"
+    DESCRIPTION
+        "Rev 1.0 - Initial version of Spectracom's SecureSync MIB module
+                   SPECTRACOM-SECURESYNC-MIB."
+
+    ::= { specModules 4 }
+
+--******************************************************************************
+-- Tree definition
+--..............................................................................
+
+specSecureSyncMIB       OBJECT IDENTIFIER ::= { specProducts 2 }
+
+-- specSecureSyncMIB subtree
+specSecSyncConfs        OBJECT IDENTIFIER ::= { specSecureSyncMIB 1 }
+specSecSyncObjs         OBJECT IDENTIFIER ::= { specSecureSyncMIB 2 }
+specSecSyncEvents       OBJECT IDENTIFIER ::= { specSecureSyncMIB 3 }
+
+--specSecSyncConfs subtree
+specSecSyncGroups       OBJECT IDENTIFIER ::= { specSecSyncConfs 1 }
+specSecSyncCompl        OBJECT IDENTIFIER ::= { specSecSyncConfs 2 }
+
+--specSecSyncObjs subtree
+ssSystemStatusObjs      OBJECT IDENTIFIER ::= { specSecSyncObjs 1 }
+ssGpsRefStatusObjs      OBJECT IDENTIFIER ::= { specSecSyncObjs 2 }
+ssOptionCardObjs        OBJECT IDENTIFIER ::= { specSecSyncObjs 3 }
+ssReferenceMgmtObjs     OBJECT IDENTIFIER ::= { specSecSyncObjs 4 }
+ssSystemControlObjs     OBJECT IDENTIFIER ::= { specSecSyncObjs 5 }
+
+--specSecSyncEvents subtree
+ssEventsV2              OBJECT IDENTIFIER ::= { specSecSyncEvents 0 }
+
+--******************************************************************************
+-- ssSystemStatusObjs Objects [enterprises.18837.3.2.2.1.x]
+--..............................................................................
+
+ssSysStaPowerAC         OBJECT-TYPE
+    SYNTAX              INTEGER { ok(1),
+                                  alarm(2),
+                                  none(3) }
+    MAX-ACCESS          read-only
+    STATUS              current
+    DESCRIPTION
+        "General status of the AC power input."
+    ::= { ssSystemStatusObjs 1 }
+
+ssSysStaPowerDC         OBJECT-TYPE
+    SYNTAX              INTEGER { ok(1),
+                                  alarm(2),
+                                  none(3) }
+    MAX-ACCESS          read-only
+    STATUS              current
+    DESCRIPTION
+        "General status of the DC power input."
+    ::= { ssSystemStatusObjs 2 }
+
+ssSysStaTimeReference   OBJECT-TYPE
+    SYNTAX              DisplayString(SIZE(5))
+    MAX-ACCESS          read-only
+    STATUS              current
+    DESCRIPTION
+        "The chosen reference source and instance for time of day information.
+         This identifier typically consists of a 3-character reference string
+         followed by a single-digit instance number.  It indicates which
+         reference is currently being used by the system for time of day.
+         The following is a list of common reference identifiers/instances:
+             gps    GPS reference             (i.e. gps0, gps1, etc.)
+             ira    IRIG AM reference         (i.e. ira0, ira1, etc.)
+             ird    IRIG DCLS reference       (i.e. ird0, ird1, etc.)
+             irg    IRIG AM/DCLS reference    (i.e. irg0, irg1, etc.)
+             asc    ASCII time code reference (i.e. asc0, asc1, etc.)
+             epp    [External] 1PPS reference (i.e. epp0, epp1, etc.)
+             frq    Frequency reference       (i.e. frq0, frq1, etc.)
+             hst    Host system reference     (i.e. hst0, hst1, etc.)
+             self   Internal reference"
+    ::= { ssSystemStatusObjs 3 }
+
+ssSysSta1PPSReference   OBJECT-TYPE
+    SYNTAX              DisplayString(SIZE(5))
+    MAX-ACCESS          read-only
+    STATUS              current
+    DESCRIPTION
+        "The chosen reference source and instance of 1 pulse-per-second
+         signal.  This identifier typically consists of a 3-character reference
+         string followed by a single-digit instance number.  It indicates which
+         reference is currently being used by the system for 1PPS.
+         The following is a list of common reference identifiers/instances:
+             gps    GPS reference             (i.e. gps0, gps1, etc.)
+             ira    IRIG AM reference         (i.e. ira0, ira1, etc.)
+             ird    IRIG DCLS reference       (i.e. ird0, ird1, etc.)
+             irg    IRIG AM/DCLS reference    (i.e. irg0, irg1, etc.)
+             asc    ASCII time code reference (i.e. asc0, asc1, etc.)
+             epp    [External] 1PPS reference (i.e. epp0, epp1, etc.)
+             frq    Frequency reference       (i.e. frq0, frq1, etc.)
+             hst    Host system reference     (i.e. hst0, hst1, etc.)
+             self   Internal reference"
+    ::= { ssSystemStatusObjs 4 }
+
+ssSysStaSyncState       OBJECT-TYPE
+    SYNTAX              INTEGER { sync(1),
+                                  nosync(2) }
+    MAX-ACCESS          read-only
+    STATUS              current
+    DESCRIPTION
+        "Status of the unit's synchronization with its time/1pps references."
+    ::= { ssSystemStatusObjs 5 }
+
+ssSysStaHoldoverState   OBJECT-TYPE
+    SYNTAX              INTEGER { inHoldover(1),
+                                  notInHoldover(2) }
+    MAX-ACCESS          read-only
+    STATUS              current
+    DESCRIPTION
+        "When in holdover, the unit has lost its references, is fly-wheeling
+         using the oscillator, and the time and frequency outputs are still
+         within specifications."
+    ::= { ssSystemStatusObjs 6 }
+
+ssSysStaTfom            OBJECT-TYPE
+    SYNTAX              Unsigned32(0..15)
+    MAX-ACCESS          read-only
+    STATUS              current
+    DESCRIPTION
+        "This indicates the estimated time error of the unit's internal time
+         with respect to the selected time/1pps references.  The following
+         table identifies the ranges per TFOM value:
+             0:  TFOM is not defined, ETE is unknown
+             1:              ETE <=   1 nsec
+             2:     1 nsec < ETE <=  10 nsec
+             3:    10 nsec < ETE <= 100 nsec
+             4:   100 nsec < ETE <=   1 usec
+             5:     1 usec < ETE <=  10 usec
+             6:    10 usec < ETE <= 100 usec
+             7:   100 usec < ETE <=   1 msec
+             8:     1 msec < ETE <=  10 msec
+             9:    10 msec < ETE <= 100 msec
+             10:  100 msec < ETE <=   1 sec
+             11:    1 sec  < ETE <=  10 sec
+             12:   10 sec  < ETE <=  100 sec
+             13:  100 sec  < ETE <= 1000 sec
+             14: 1000 sec  < ETE <= 10000 sec
+             15:             ETE >  10000 sec"
+    ::= { ssSystemStatusObjs 7 }
+
+ssSysStaEstPhaseError   OBJECT-TYPE
+    SYNTAX              Integer32
+    UNITS               "nanoseconds"
+    MAX-ACCESS          read-only
+    STATUS              current
+    DESCRIPTION
+        "This indicates the estimated phase error (magnitude) of the unit's
+         internal 1PPS with respect to the selected 1pps reference."
+    ::= { ssSystemStatusObjs 8 }
+
+ssSysStaEstFreqError    OBJECT-TYPE
+    SYNTAX              DisplayString(SIZE(20))
+    UNITS               "hertz"
+    MAX-ACCESS          read-only
+    STATUS              current
+    DESCRIPTION
+        "This indicates the estimated frequency error (magnitude) of the unit's
+         internal 10 MHz oscillator with respect to the selected 1pps
+         reference."
+    ::= { ssSystemStatusObjs 9 }
+
+ssSysStaTimeScale       OBJECT-TYPE
+    SYNTAX              INTEGER { utc(1),
+                                  tai(2),
+                                  gps(3) }
+    MAX-ACCESS          read-only
+    STATUS              current
+    DESCRIPTION
+        "Timescale of the unit's timing system."
+    ::= { ssSystemStatusObjs 10 }
+
+ssSysStaVersion         OBJECT-TYPE
+    SYNTAX              DisplayString(SIZE(20))
+    MAX-ACCESS          read-only
+    STATUS              current
+    DESCRIPTION
+        "This indicates the current overall system software version."
+    ::= { ssSystemStatusObjs 11 }
+
+ssSysStaTimingVersion   OBJECT-TYPE
+    SYNTAX              DisplayString(SIZE(20))
+    MAX-ACCESS          read-only
+    STATUS              current
+    DESCRIPTION
+        "This indicates the current timing system software version."
+    ::= { ssSystemStatusObjs 12 }
+
+ssSysStaMinorAlarm      OBJECT-TYPE
+    SYNTAX              INTEGER { pending(1),
+                                  clear(2) }
+    MAX-ACCESS          read-only
+    STATUS              current
+    DESCRIPTION
+        "This indicates whether or not a minor alarm is currently active.
+         The value of pending indicates that the alarm condition is active and
+         is pending resolution."
+    ::= { ssSystemStatusObjs 13 }
+
+ssSysStaMajorAlarm      OBJECT-TYPE
+    SYNTAX              INTEGER { pending(1),
+                                  clear(2) }
+    MAX-ACCESS          read-only
+    STATUS              current
+    DESCRIPTION
+        "This indicates whether or not a major alarm is currently pending.
+         The value of pending indicates that the alarm condition is active and
+         is pending resolution."
+    ::= { ssSystemStatusObjs 14 }
+
+ssSysStaDateTime        OBJECT-TYPE
+    SYNTAX              DisplayString(SIZE(30))
+    MAX-ACCESS          read-only
+    STATUS              current
+    DESCRIPTION
+        "This indicates the current system date and time in the following
+         format:
+                 YYYY DDD HH:MM:SS.NNNNNNNNN
+         where:
+                 YYYY      = Year
+                 DDD       = Day of Year
+                 HH        = Hour
+                 MM        = Minute
+                 SS        = Second
+                 NNNNNNNNN = Subseconds"
+    ::= { ssSystemStatusObjs 15 }
+
+ssSysStaSerial          OBJECT-TYPE
+    SYNTAX              DisplayString(SIZE(20))
+    MAX-ACCESS          read-only
+    STATUS              current
+    DESCRIPTION
+        "This indicates the system serial number."
+    ::= { ssSystemStatusObjs 16 }
+
+ssSysStaOscTemp         OBJECT-TYPE
+    SYNTAX              DisplayString(SIZE(20))
+    MAX-ACCESS          read-only
+    STATUS              current
+    DESCRIPTION
+        "This unit's Oscillator Temperature in degrees Celsius."
+    ::= { ssSystemStatusObjs 17 }
+    
+ssSysStaBrdTemp         OBJECT-TYPE
+    SYNTAX              DisplayString(SIZE(20))
+    MAX-ACCESS          read-only
+    STATUS              current
+    DESCRIPTION
+        "This unit's Board Temperature in degrees Celsius."
+    ::= { ssSystemStatusObjs 18 }
+    
+ssSysStaCpuTemp         OBJECT-TYPE
+    SYNTAX              DisplayString(SIZE(20))
+    MAX-ACCESS          read-only
+    STATUS              current
+    DESCRIPTION
+        "This unit's CPU Temperature in degrees Celsius."
+    ::= { ssSystemStatusObjs 19 }
+
+--******************************************************************************
+-- ssGpsRefStatusObjs Objects [enterprises.18837.3.2.2.2.x]
+--..............................................................................
+
+ssGpsRefTable           OBJECT-TYPE
+    SYNTAX              SEQUENCE OF SsGpsRefTableEntry
+    MAX-ACCESS          not-accessible
+    STATUS              current
+    DESCRIPTION
+        "This table contains status for all GPS references that are present in
+         in system."
+    ::= { ssGpsRefStatusObjs 1 }
+
+ssGpsRefTableEntry      OBJECT-TYPE
+    SYNTAX              SsGpsRefTableEntry
+    MAX-ACCESS          not-accessible
+    STATUS              current
+    DESCRIPTION
+        "A table entry (row) in the GPS reference table."
+    INDEX               { ssGpsRefRow }
+    ::= { ssGpsRefTable 1 }
+
+SsGpsRefTableEntry ::= SEQUENCE {
+        ssGpsRefRow           Unsigned32,
+        ssGpsRefInstance      Unsigned32,
+        ssGpsReference        DisplayString,
+        ssGpsRefTimeValid     INTEGER,
+        ssGpsRef1ppsValid     INTEGER,
+        ssGpsRefRcvMode       INTEGER,
+        ssGpsRefDynMode       INTEGER,
+        ssGpsRefNumSats       Unsigned32,
+        ssGpsRefPdop          DisplayString,
+        ssGpsRefHdop          DisplayString,
+        ssGpsRefVdop          DisplayString,
+        ssGpsRefTdop          DisplayString,
+        ssGpsRefLatitude      DisplayString,
+        ssGpsRefLongitude     DisplayString,
+        ssGpsRefAltitude      DisplayString,
+        ssGpsRefOffset        Integer32,
+        ssGpsRefAntennaState  INTEGER }
+
+ssGpsRefRow             OBJECT-TYPE
+    SYNTAX              Unsigned32(1..8)
+    MAX-ACCESS          not-accessible
+    STATUS              current
+    DESCRIPTION
+        "This is the index value for each table row."
+    ::= { ssGpsRefTableEntry 1 }
+
+ssGpsRefInstance        OBJECT-TYPE
+    SYNTAX              Unsigned32(0..7)
+    MAX-ACCESS          read-only
+    STATUS              current
+    DESCRIPTION
+        "This is the unique instance for each GPS reference."
+    ::= { ssGpsRefTableEntry 2 }
+
+ssGpsReference          OBJECT-TYPE
+    SYNTAX              DisplayString(SIZE(5))
+    MAX-ACCESS          read-only
+    STATUS              current
+    DESCRIPTION
+        "The GPS reference identifier."
+    ::= { ssGpsRefTableEntry 3 }
+
+ssGpsRefTimeValid       OBJECT-TYPE
+    SYNTAX              INTEGER { valid(1),
+                                  invalid(2) }
+    MAX-ACCESS          read-only
+    STATUS              current
+    DESCRIPTION
+        "This indicates whether this GPS reference has can provide valid time."
+    ::= { ssGpsRefTableEntry 4 }
+
+ssGpsRef1ppsValid       OBJECT-TYPE
+    SYNTAX              INTEGER { valid(1),
+                                  invalid(2) }
+    MAX-ACCESS          read-only
+    STATUS              current
+    DESCRIPTION
+        "This indicates whether this GPS reference has can provide valid 1PPS."
+    ::= { ssGpsRefTableEntry 5 }
+
+ssGpsRefRcvMode         OBJECT-TYPE
+    SYNTAX              INTEGER { singleSat(1),
+                                  standard(2),
+                                  continuous(3),
+                                  averaging(4),
+                                  timeOnly(5),
+                                  standby(6),
+                                  selfTest(7) }
+    MAX-ACCESS          read-only
+    STATUS              current
+    DESCRIPTION
+        "This indicates the current GPS reference operating mode."
+    ::= { ssGpsRefTableEntry 6 }
+
+ssGpsRefDynMode         OBJECT-TYPE
+    SYNTAX              INTEGER { land(1),
+                                  sea(2),
+                                  air(3),
+                                  stationary(4) }
+    MAX-ACCESS          read-only
+    STATUS              current
+    DESCRIPTION
+        "This indicates the current GPS reference dynamics mode.  Note that the
+         land, sea, and air modes are for mobile operation."
+    ::= { ssGpsRefTableEntry 7 }
+
+ssGpsRefNumSats         OBJECT-TYPE
+    SYNTAX              Unsigned32
+    MAX-ACCESS          read-only
+    STATUS              current
+    DESCRIPTION
+        "This is the number of satellites currently used in position and time
+         fix calculations."
+    ::= { ssGpsRefTableEntry 8 }
+
+ssGpsRefPdop            OBJECT-TYPE
+    SYNTAX              DisplayString(SIZE(20))
+    MAX-ACCESS          read-only
+    STATUS              current
+    DESCRIPTION
+        "Positional dilution of precision."
+    ::= { ssGpsRefTableEntry 9 }
+
+ssGpsRefHdop            OBJECT-TYPE
+    SYNTAX              DisplayString(SIZE(20))
+    MAX-ACCESS          read-only
+    STATUS              current
+    DESCRIPTION
+        "Horizontal dilution of precision."
+    ::= { ssGpsRefTableEntry 10 }
+
+ssGpsRefVdop            OBJECT-TYPE
+    SYNTAX              DisplayString(SIZE(20))
+    MAX-ACCESS          read-only
+    STATUS              current
+    DESCRIPTION
+        "Vertical dilution of precision."
+    ::= { ssGpsRefTableEntry 11 }
+
+ssGpsRefTdop            OBJECT-TYPE
+    SYNTAX              DisplayString(SIZE(20))
+    MAX-ACCESS          read-only
+    STATUS              current
+    DESCRIPTION
+        "Temporal dilution of precision."
+    ::= { ssGpsRefTableEntry 12 }
+
+ssGpsRefLatitude        OBJECT-TYPE
+    SYNTAX              DisplayString(SIZE(20))
+    UNITS               "degrees"
+    MAX-ACCESS          read-only
+    STATUS              current
+    DESCRIPTION
+        "This is the latitude location of the GPS antenna in radians."
+    ::= { ssGpsRefTableEntry 13 }
+
+ssGpsRefLongitude       OBJECT-TYPE
+    SYNTAX              DisplayString(SIZE(20))
+    UNITS               "degrees"
+    MAX-ACCESS          read-only
+    STATUS              current
+    DESCRIPTION
+        "This is the longitude location of the GPS antenna in radians."
+    ::= { ssGpsRefTableEntry 14 }
+
+ssGpsRefAltitude       OBJECT-TYPE
+    SYNTAX              DisplayString(SIZE(20))
+    UNITS               "meters"
+    MAX-ACCESS          read-only
+    STATUS              current
+    DESCRIPTION
+        "This is the altitude of the GPS antenna in meters above mean sea
+         level."
+    ::= { ssGpsRefTableEntry 15 }
+
+ssGpsRefOffset          OBJECT-TYPE
+    SYNTAX              Integer32
+    UNITS               "nanoseconds"
+    MAX-ACCESS          read-only
+    STATUS              current
+    DESCRIPTION
+        "This is the offset applied to the GPS reference 1PPS in nanoseconds."
+    ::= { ssGpsRefTableEntry 16 }
+
+ssGpsRefAntennaState    OBJECT-TYPE
+    SYNTAX              INTEGER { ok(1),
+                                  short(2),
+                                  open(3),
+                                  unknown(4) }
+    MAX-ACCESS          read-only
+    STATUS              current
+    DESCRIPTION
+        "This indicates the current GPS reference antenna state."
+    ::= { ssGpsRefTableEntry 17 }
+
+--******************************************************************************
+-- ssOptionCardObjs Objects [enterprises.18837.3.2.2.3.x]
+--..............................................................................
+
+--******************************************************************************
+-- ssReferenceMgmtObjs Objects [enterprises.18837.3.2.2.4.x]
+--..............................................................................
+
+ssRefMgmtTable          OBJECT-TYPE
+    SYNTAX              SEQUENCE OF SsRefMgmtTableEntry
+    MAX-ACCESS          not-accessible
+    STATUS              current
+    DESCRIPTION
+        "This table contains time and 1PPS reference pairs and the priority of
+         those pairs withing the timing system.  Priority value 1 is highest."
+    ::= { ssReferenceMgmtObjs 1 }
+
+ssRefMgmtTableEntry     OBJECT-TYPE
+    SYNTAX              SsRefMgmtTableEntry
+    MAX-ACCESS          not-accessible
+    STATUS              current
+    DESCRIPTION
+        "A table entry (row) in the GPS reference table."
+    INDEX               { ssRefMgmtRow }
+    ::= { ssRefMgmtTable 1 }
+
+SsRefMgmtTableEntry ::= SEQUENCE {
+        ssRefMgmtRow       Unsigned32,
+        ssRefMgmtIndex     Unsigned32,
+        ssRefMgmtState     INTEGER,
+        ssRefMgmtPriority  Unsigned32,
+        ssRefMgmtTime      DisplayString,
+        ssRefMgmt1PPS      DisplayString,
+        ssRefMgmtTimeValid INTEGER,
+		ssRefMgmt1PPSValid INTEGER}
+
+ssRefMgmtRow            OBJECT-TYPE
+    SYNTAX              Unsigned32(1..15)
+    MAX-ACCESS          not-accessible
+    STATUS              current
+    DESCRIPTION
+        "This is the index value for each table row."
+    ::= { ssRefMgmtTableEntry 1 }
+
+ssRefMgmtIndex          OBJECT-TYPE
+    SYNTAX              Unsigned32(0..14)
+    MAX-ACCESS          read-only
+    STATUS              current
+    DESCRIPTION
+        "This is the system index for each table entry.  This is the index
+         value used internally by the timing system to address each row of the
+         table."
+    ::= { ssRefMgmtTableEntry 2 }
+
+ssRefMgmtState          OBJECT-TYPE
+    SYNTAX              INTEGER { enabled(1),
+                                  disabled(2) }
+    MAX-ACCESS          read-write
+    STATUS              current
+    DESCRIPTION
+        "This is the enable/disable state for each row."
+    ::= { ssRefMgmtTableEntry 3 }
+
+ssRefMgmtPriority       OBJECT-TYPE
+    SYNTAX              Unsigned32(1..15)
+    MAX-ACCESS          read-write
+    STATUS              current
+    DESCRIPTION
+        "This is the priority indicator for each reference pair.  Priority
+         value 1 is highest."
+    ::= { ssRefMgmtTableEntry 4 }
+
+ssRefMgmtTime           OBJECT-TYPE
+    SYNTAX              DisplayString(SIZE(5))
+    MAX-ACCESS          read-only
+    STATUS              current
+    DESCRIPTION
+        "This is the time reference identifier.    This identifier typically
+         consists of a 3-character reference string followed by a single-digit
+         instance number.  It indicates a reference to be used by the system
+         for time.  The following is a list of common reference
+         identifiers/instances:
+             gps    GPS reference             (i.e. gps0, gps1, etc.)
+             ira    IRIG AM reference         (i.e. ira0, ira1, etc.)
+             ird    IRIG DCLS reference       (i.e. ird0, ird1, etc.)
+             irg    IRIG AM/DCLS reference    (i.e. irg0, irg1, etc.)
+             asc    ASCII time code reference (i.e. asc0, asc1, etc.)
+             epp    [External] 1PPS reference (i.e. epp0, epp1, etc.)
+             frq    Frequency reference       (i.e. frq0, frq1, etc.)
+             hst    Host system reference     (i.e. hst0, hst1, etc.)
+             self   Internal reference"
+    ::= { ssRefMgmtTableEntry 5 }
+
+ssRefMgmt1PPS           OBJECT-TYPE
+    SYNTAX              DisplayString(SIZE(5))
+    MAX-ACCESS          read-only
+    STATUS              current
+    DESCRIPTION
+        "This is the 1PPS reference identifier.    This identifier typically
+         consists of a 3-character reference string followed by a single-digit
+         instance number.  It indicates a reference to be used by the system
+         for 1PPS.  The following is a list of common reference
+         identifiers/instances:
+             gps    GPS reference             (i.e. gps0, gps1, etc.)
+             ira    IRIG AM reference         (i.e. ira0, ira1, etc.)
+             ird    IRIG DCLS reference       (i.e. ird0, ird1, etc.)
+             irg    IRIG AM/DCLS reference    (i.e. irg0, irg1, etc.)
+             asc    ASCII time code reference (i.e. asc0, asc1, etc.)
+             epp    [External] 1PPS reference (i.e. epp0, epp1, etc.)
+             frq    Frequency reference       (i.e. frq0, frq1, etc.)
+             hst    Host system reference     (i.e. hst0, hst1, etc.)
+             self   Internal reference"
+    ::= { ssRefMgmtTableEntry 6 }
+
+ssRefMgmtTimeValid       OBJECT-TYPE
+    SYNTAX              INTEGER { valid(1),
+                                  invalid(2) }
+    MAX-ACCESS          read-only
+    STATUS              current
+    DESCRIPTION
+        "This indicates whether the input reference has can provide valid time for each row."
+    ::= { ssRefMgmtTableEntry 7 }
+
+ssRefMgmt1PPSValid       OBJECT-TYPE
+    SYNTAX              INTEGER { valid(1),
+                                  invalid(2) }
+    MAX-ACCESS          read-only
+    STATUS              current
+    DESCRIPTION
+        "This indicates whether the input reference has can provide valid 1PPS for each row."
+    ::= { ssRefMgmtTableEntry 8 }
+
+--******************************************************************************
+-- ssSystemControlObjs Objects [enterprises.18837.3.2.2.5.x]
+--..............................................................................
+
+ssSysCtrlCommand        OBJECT-TYPE
+    SYNTAX              INTEGER { idle(1),
+                                  update(2),
+                                  forceupdate(3),
+                                  reboot(4) }
+    MAX-ACCESS          read-write
+    STATUS              current
+    DESCRIPTION
+        "This allows simple control commands to be applied to the system.
+         Commands (other than idle) issued via this object will take effect 60
+         seconds after the command is written.  The command descriptions are as
+         follows:
+             idle:        Cancel a pending update, forceupdate, or reboot
+                            command.
+             update:      Update the system software/firmware using the update
+                            file specified by the ssSysUpdateFile object.  Any
+                            subsystem that matches or exceeds the version in
+                            the update file will not be updated.
+             forceupdate: Update the system software/firmware using the update
+                            file specified by the ssSysUpdateFile object.  All
+                            subsystems contained within the update file will be
+                            updated regardless of their current version.
+             reboot:      Shutdown and reboot the system."
+    ::= { ssSystemControlObjs 1 }
+
+ssSysUpdateFile         OBJECT-TYPE
+    SYNTAX              DisplayString(SIZE(80))
+    MAX-ACCESS          read-only
+    STATUS              current
+    DESCRIPTION
+        "This indicates the last (alphabetical) file name of update bundles
+         residing in the administrator (spadmin) home directory.  This file
+         will be used to update the system if an update or forceupdate command
+         is set via the ssSysCtrlCommand object."
+    ::= { ssSystemControlObjs 2 }
+
+--******************************************************************************
+-- ssEventsV2 [enterprises.18837.3.2.3.x]
+--..............................................................................
+
+ssEvtV2TimeSync         NOTIFICATION-TYPE
+    OBJECTS             { ssSysStaSyncState }
+    STATUS              current
+    DESCRIPTION
+        "The unit has either entered or left the synchronized state."
+    ::= { ssEventsV2 1 }
+
+ssEvtV2Holdover         NOTIFICATION-TYPE
+    OBJECTS             { ssSysStaHoldoverState }
+    STATUS              current
+    DESCRIPTION
+        "The unit has either entered or left the holdover state."
+    ::= { ssEventsV2 2 }
+
+ssEvtV2FrequencyError   NOTIFICATION-TYPE
+    OBJECTS             { ssSysStaEstFreqError }
+    STATUS              current
+    DESCRIPTION
+        "The frequency output error exceeds specifications."
+    ::= { ssEventsV2 3 }
+
+ssEvtV2FrequencyOK      NOTIFICATION-TYPE
+    OBJECTS             { ssSysStaEstFreqError }
+    STATUS              current
+    DESCRIPTION
+        "The frequency output error meets specifications."
+    ::= { ssEventsV2 4 }
+
+ssEvtV2UserMinorAlarm   NOTIFICATION-TYPE
+    OBJECTS             { ssGpsRefNumSats }
+    STATUS              current
+    DESCRIPTION
+        "The user-programmable minor alarm timeout has been asserted."
+    ::= { ssEventsV2 5 }
+
+ssEvtV2UserMinorClear   NOTIFICATION-TYPE
+    OBJECTS             { ssGpsRefNumSats }
+    STATUS              current
+    DESCRIPTION
+        "The user-programmable minor alarm timeout has been reset."
+    ::= { ssEventsV2 6 }
+
+ssEvtV2UserMajorAlarm   NOTIFICATION-TYPE
+    OBJECTS             { ssGpsRefNumSats }
+    STATUS              current
+    DESCRIPTION
+        "The user-programmable major alarm timeout has been asserted."
+    ::= { ssEventsV2 7 }
+
+ssEvtV2UserMajorClear   NOTIFICATION-TYPE
+    OBJECTS             { ssGpsRefNumSats }
+    STATUS              current
+    DESCRIPTION
+        "The user-programmable major alarm timeout has been reset."
+    ::= { ssEventsV2 8 }
+
+ssEvtV2GpsAntenna       NOTIFICATION-TYPE
+    OBJECTS             { ssGpsRefAntennaState }
+    STATUS              current
+    DESCRIPTION
+        "The GPS antenna state has changed."
+    ::= { ssEventsV2 9 }
+
+ssEvtV2MinorAlarm       NOTIFICATION-TYPE
+    OBJECTS             { ssSysStaMinorAlarm }
+    STATUS              current
+    DESCRIPTION
+        "The system minor alarm has changed state."
+    ::= { ssEventsV2 10 }
+
+ssEvtV2MajorAlarm       NOTIFICATION-TYPE
+    OBJECTS             { ssSysStaMajorAlarm }
+    STATUS              current
+    DESCRIPTION
+        "The system major alarm has changed state."
+    ::= { ssEventsV2 11 }
+
+ssEvtV2RefChange        NOTIFICATION-TYPE
+    OBJECTS             { ssSysStaTimeReference, ssSysSta1PPSReference }
+    STATUS              current
+    DESCRIPTION
+        "The selected time reference has changed."
+    ::= { ssEventsV2 12 }
+
+ssEvtV21ppsError        NOTIFICATION-TYPE
+    OBJECTS             { ssSysStaTimeReference, ssSysSta1PPSReference }
+    STATUS              current
+    DESCRIPTION
+        "The 1PPS output error exceeds specifications."
+    ::= { ssEventsV2 13 }
+
+ssEvtV21ppsOK           NOTIFICATION-TYPE
+    OBJECTS             { ssSysStaTimeReference, ssSysSta1PPSReference }
+    STATUS              current
+    DESCRIPTION
+        "The 1PPS output error meets specifications."
+    ::= { ssEventsV2 14 }
+
+ssEvtV2HwError          NOTIFICATION-TYPE
+    OBJECTS             { ssSysStaTimeReference, ssSysSta1PPSReference }
+    STATUS              current
+    DESCRIPTION
+        "The timing system hardware is impaired."
+    ::= { ssEventsV2 15 }
+
+ssEvtV2OscillatorAlarm  NOTIFICATION-TYPE
+    OBJECTS             { ssSysStaEstFreqError }
+    STATUS              current
+    DESCRIPTION
+        "The oscillator is requires maintenance.  This typically indicates that
+         the oscillator is within 10% of the edge its adjustable range (TCXO
+         and OCXO) or the oscillator module lamp needs service (Rubidium)."
+    ::= { ssEventsV2 16 }
+
+ssEvtV2OscillatorOK     NOTIFICATION-TYPE
+    OBJECTS             { ssSysStaEstFreqError }
+    STATUS              current
+    DESCRIPTION
+        "The oscillator no longer requires maintenance.  This typically
+         indicates that the oscillator adjustment value has changed and is now
+         greater than 10% from the edge of its adjustable range."
+    ::= { ssEventsV2 17 }
+
+ssEvtV2Reboot           NOTIFICATION-TYPE
+    STATUS              current
+    DESCRIPTION
+        "The system has rebooted."
+    ::= { ssEventsV2 18 }
+
+ssEvtV2MaxTempMinorAlarm NOTIFICATION-TYPE
+    OBJECTS             { ssSysStaCpuTemp }
+    STATUS              current
+    DESCRIPTION
+        "The maximum temperature minor alarm has been asserted."
+    ::= { ssEventsV2 19 }
+
+ssEvtV2MaxTempMinorClear NOTIFICATION-TYPE
+    OBJECTS             { ssSysStaCpuTemp }
+    STATUS              current
+    DESCRIPTION
+        "The maximum temperature minor alarm has been reset."
+    ::= { ssEventsV2 20 }
+    
+ssEvtV2MaxTempMajorAlarm NOTIFICATION-TYPE
+    OBJECTS             { ssSysStaCpuTemp }
+    STATUS              current
+    DESCRIPTION
+        "The maximum temperature major alarm has been asserted."
+    ::= { ssEventsV2 21 }
+
+ssEvtV2MaxTempMajorClear NOTIFICATION-TYPE
+    OBJECTS             { ssSysStaCpuTemp }
+    STATUS              current
+    DESCRIPTION
+        "The maximum temperature major alarm has been reset."
+    ::= { ssEventsV2 22 }
+    
+--******************************************************************************
+-- Conformance Section [enterprises.18837.3.1.90.x]
+--..............................................................................
+
+-- OEM
+ssConformance     OBJECT IDENTIFIER ::= { specSecureSyncMIB 90 }
+ssCompliances     OBJECT IDENTIFIER ::= { ssConformance 1 }
+ssGroups          OBJECT IDENTIFIER ::= { ssConformance 2 }
+
+ssCompliance      MODULE-COMPLIANCE
+    STATUS        current
+    DESCRIPTION
+        "The compliance statement for SNMP entities which implement version 2
+         of the Spectracom SecureSync MIB"
+    MODULE -- this module
+        MANDATORY-GROUPS { ssObjectsGroup,
+                           ssTrapsGroup }
+    ::= { ssCompliances 1 }
+
+-- CONFORMANCE_OEM
+ssObjectsGroup    OBJECT-GROUP
+    OBJECTS       { ssSysStaPowerAC,
+                    ssSysStaPowerDC,
+                    ssSysStaTimeReference,
+                    ssSysSta1PPSReference,
+                    ssSysStaSyncState,
+                    ssSysStaHoldoverState,
+                    ssSysStaTfom,
+                    ssSysStaEstPhaseError,
+                    ssSysStaEstFreqError,
+                    ssSysStaTimeScale,
+                    ssSysStaVersion,
+                    ssSysStaTimingVersion,
+                    ssSysStaMinorAlarm,
+                    ssSysStaMajorAlarm,
+                    ssSysStaDateTime,
+                    ssSysStaSerial,
+                    ssSysStaOscTemp,
+                    ssSysStaBrdTemp,
+                    ssSysStaCpuTemp,
+                    ssGpsRefInstance,
+                    ssGpsReference,
+                    ssGpsRefTimeValid,
+                    ssGpsRef1ppsValid,
+                    ssGpsRefRcvMode,
+                    ssGpsRefDynMode,
+                    ssGpsRefNumSats,
+                    ssGpsRefPdop,
+                    ssGpsRefHdop,
+                    ssGpsRefVdop,
+                    ssGpsRefTdop,
+                    ssGpsRefLatitude,
+                    ssGpsRefLongitude,
+                    ssGpsRefAltitude,
+                    ssGpsRefOffset,
+                    ssGpsRefAntennaState,
+                    ssRefMgmtIndex,
+                    ssRefMgmtState,
+                    ssRefMgmtPriority,
+                    ssRefMgmtTime,
+                    ssRefMgmt1PPS,
+                    ssRefMgmtTimeValid,
+                    ssRefMgmt1PPSValid,
+                    ssSysCtrlCommand,
+                    ssSysUpdateFile }
+    STATUS        current
+    DESCRIPTION
+        "The collection of objects for the Spectracom SecureSync MIB."
+    ::= { ssGroups 1 }
+
+-- NOTIFICATION_OEM
+ssTrapsGroup      NOTIFICATION-GROUP
+    NOTIFICATIONS { ssEvtV2TimeSync,
+                    ssEvtV2Holdover,
+                    ssEvtV2FrequencyError,
+                    ssEvtV2FrequencyOK,
+                    ssEvtV2UserMinorAlarm,
+                    ssEvtV2UserMinorClear,
+                    ssEvtV2UserMajorAlarm,
+                    ssEvtV2UserMajorClear,
+                    ssEvtV2GpsAntenna,
+                    ssEvtV2MinorAlarm,
+                    ssEvtV2MajorAlarm,
+                    ssEvtV2RefChange,
+                    ssEvtV21ppsError,
+                    ssEvtV21ppsOK,
+                    ssEvtV2HwError,
+                    ssEvtV2OscillatorAlarm,
+                    ssEvtV2OscillatorOK,
+                    ssEvtV2Reboot,
+                    ssEvtV2MaxTempMinorAlarm,
+                    ssEvtV2MaxTempMinorClear,
+                    ssEvtV2MaxTempMajorAlarm,
+                    ssEvtV2MaxTempMajorClear }
+    STATUS        current
+    DESCRIPTION
+        "The collection of traps for the Spectracom SecureSync MIB."
+    ::= { ssGroups 2 }
+
+END

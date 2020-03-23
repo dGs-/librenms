@@ -139,6 +139,14 @@ and `ad-usergroup` with your standard user group. It is __highly
 suggested__ to create a bind user, otherwise "remember me", alerting
 users, and the API will not work.
 
+## Active Directory Username Attribut
+
+By default your login username use the `sAMAccountName` attribut. If you prefer to use the `UserPrincipalName` attribut as your login username, you can edit the `$config['auth_ad_username_attr']` like this example:
+
+```
+$config['auth_ad_username_attr'] = "userprincipalname";
+```
+
 ## Active Directory redundancy
 
 You can set two Active Directory servers by editing the

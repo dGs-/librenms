@@ -79,7 +79,7 @@ trait ActiveDirectoryCommon
     protected function userFilter($username)
     {
         // don't return disabled users
-        $user_filter = "(&(samaccountname=$username)(!(useraccountcontrol:1.2.840.113556.1.4.803:=2))";
+        $user_filter = "(&(" . Config::get('auth_ad_username_attr') . "=$username)(!(useraccountcontrol:1.2.840.113556.1.4.803:=2))";
 
         $extra = Config::get('auth_ad_user_filter');
         if ($extra) {
@@ -158,13 +158,13 @@ trait ActiveDirectoryCommon
             if (Config::get('auth_ad_user_filter')) {
                 $search_filter = "(&" . Config::get('auth_ad_user_filter') . $search_filter .")";
             }
-            $attributes = array('samaccountname', 'displayname', 'objectsid', 'mail');
+            $attributes = array(Config::get('auth_ad_username_attr'), 'displayname', 'objectsid', 'mail');
             $search = ldap_search($connection, Config::get('auth_ad_base_dn'), $search_filter, $attributes);
             $results = ldap_get_entries($connection, $search);
 
             foreach ($results as $result) {
-                if (isset($result['samaccountname'][0])) {
-                    $userlist[$result['samaccountname'][0]] = $this->userFromAd($result);
+                if (isset($result[Config::get('auth_ad_username_attr')][0])) {
+                    $userlist[$result[Config::get('auth_ad_username_attr')][0]] = $this->userFromAd($result);
                 }
             }
         }
@@ -184,11 +184,11 @@ trait ActiveDirectoryCommon
     {
         return array(
             'user_id' => $this->getUseridFromSid($this->sidFromLdap($entry['objectsid'][0])),
-            'username' => $entry['samaccountname'][0],
+            'username' => $entry[Config::get('auth_ad_username_attr')][0],
             'realname' => $entry['displayname'][0],
             'email' => isset($entry['mail'][0]) ? $entry['mail'][0] : null,
             'descr' => '',
-            'level' => $this->getUserlevel($entry['samaccountname'][0]),
+            'level' => $this->getUserlevel($entry[Config::get('auth_ad_username_attr')][0]),
             'can_modify_passwd' => 0,
         );
     }
@@ -199,11 +199,11 @@ trait ActiveDirectoryCommon
         $domain_sid = $this->getDomainSid();
 
         $search_filter = "(&(objectcategory=person)(objectclass=user)(objectsid=$domain_sid-$user_id))";
-        $attributes = array('samaccountname', 'displayname', 'objectsid', 'mail');
+        $attributes = array(Config::get('auth_ad_username_attr'), 'displayname', 'objectsid', 'mail');
         $search = ldap_search($connection, Config::get('auth_ad_base_dn'), $search_filter, $attributes);
         $entry = ldap_get_entries($connection, $search);
 
-        if (isset($entry[0]['samaccountname'][0])) {
+        if (isset($entry[0][Config::get('auth_ad_username_attr')][0])) {
             return $this->userFromAd($entry[0]);
         }
 

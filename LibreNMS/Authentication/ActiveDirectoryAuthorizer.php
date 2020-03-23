@@ -23,8 +23,13 @@ class ActiveDirectoryAuthorizer extends AuthorizerBase
         $this->connect();
 
         if ($this->ldap_connection) {
+            if (Config::get('auth_ad_username_attr') == "samaccountname") {
+                $credential_username = $credentials['username'] . '@' . Config::get('auth_ad_domain');
+            } else {
+                $credential_username = $credentials['username'];
+            }
             // bind with sAMAccountName instead of full LDAP DN
-            if (!empty($credentials['username']) && !empty($credentials['password']) && ldap_bind($this->ldap_connection, $credentials['username'] . '@' . Config::get('auth_ad_domain'), $credentials['password'])) {
+            if (!empty($credentials['username']) && !empty($credentials['password']) && ldap_bind($this->ldap_connection, $credential_username, $credentials['password'])) {
                 $this->is_bound = true;
                 // group membership in one of the configured groups is required
                 if (Config::get('auth_ad_require_groupmembership', true)) {
@@ -112,10 +117,9 @@ class ActiveDirectoryAuthorizer extends AuthorizerBase
             $connection,
             Config::get('auth_ad_base_dn'),
             $this->userFilter($username),
-            array('samaccountname')
+            array(Config::get('auth_ad_username_attr'))
         );
         $entries = ldap_get_entries($connection, $search);
-
 
         if ($entries['count']) {
             return 1;

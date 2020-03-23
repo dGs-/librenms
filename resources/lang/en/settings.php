@@ -229,6 +229,10 @@ return [
             'description' => 'User LDAP filter',
             'help' => 'Active Directory LDAP filter for selecting users'
         ],
+        'auth_ad_username_attr' => [
+            'description' => 'Username attribut',
+            'help' => 'Choose between samaccountname and userprincipalname to use as username'
+        ],
         'auth_ldap_attr' => [
             'uid' => [
                 'description' => 'Attribute to check username against',

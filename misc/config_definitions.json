@@ -338,6 +338,17 @@
             },
             "type": "array"
         },
+        "auth_ad_username_attr": {
+            "default": "samaccountname",
+            "group": "auth",
+            "section": "ad",
+            "order": 0,
+            "type": "select",
+            "options": {
+                "samaccountname": "samaccountname",
+                "userprincipalname": "userprincipalname"
+            }
+        },
         "auth_ad_base_dn": {
             "group": "auth",
             "section": "ad",
@@ -348,46 +359,46 @@
             "default": false,
             "group": "auth",
             "section": "ad",
-            "order": 1,
+            "order": 3,
             "type": "boolean"
         },
         "auth_ad_group_filter": {
             "default": "(objectclass=group)",
             "group": "auth",
             "section": "ad",
-            "order": 1,
+            "order": 5,
             "type": "text"
         },
         "auth_ad_groups": {
             "default": {},
             "group": "auth",
             "section": "ad",
-            "order": 4,
+            "order": 6,
             "type": "ldap-groups"
         },
         "auth_ad_user_filter": {
             "default": "(objectclass=user)",
             "group": "auth",
             "section": "ad",
-            "order": 0,
+            "order": 4,
             "type": "text"
         },
         "auth_ad_binddn": {
             "group": "auth",
             "section": "ad",
-            "order": 9,
+            "order": 8,
             "type": "text"
         },
         "auth_ad_bindpassword": {
             "group": "auth",
             "section": "ad",
-            "order": 8,
+            "order": 9,
             "type": "password"
         },
         "auth_ad_binduser": {
             "group": "auth",
             "section": "ad",
-            "order": 10,
+            "order": 7,
             "type": "text"
         },
         "auth_ldap_attr.uid": {
